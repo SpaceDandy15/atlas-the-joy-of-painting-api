@@ -12,9 +12,17 @@ This project explores the ETL (Extract, Transform, Load) process by organizing e
   - Subject matter (e.g., mountain, lake)
   - Color palette (e.g., phthalo blue, titanium white)
 
-##Database Schema
+## Database Schema
 
 The data is structured using a normalized relational schema to support many-to-many relationships between paintings, colors, and subjects.
 
 📄 **[View Schema Diagram](assets/Bob_Ross_ERD.png)**
 
+##  Database Setup
+
+To create the database locally, run:
+
+```bash
+# PostgreSQL example
+createdb bob_ross
+psql -d bob_ross -f schema/schema.sql
