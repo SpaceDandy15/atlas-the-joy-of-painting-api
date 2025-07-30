@@ -26,3 +26,10 @@ To create the database locally, run:
 # PostgreSQL example
 createdb bob_ross
 psql -d bob_ross -f schema/schema.sql
+
+## Load Data (ETL)
+
+To import the cleaned data into the database, run:
+
+```bash
+python etl/load_data.py
