@@ -4,7 +4,7 @@ def get_db_connection():
     return psycopg2.connect(
         dbname="joy_of_painting",
         user="bob_ross",
-        password="colors",
+        password="*****",
         host="localhost",
         port="5432"
     )
