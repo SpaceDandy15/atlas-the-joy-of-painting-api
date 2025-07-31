@@ -1,36 +1,50 @@
-# Apply transformations and cleanup to raw data
+import pandas as pd
+
+def transform_paintings(paintings_df):
+    paintings_df['title'] = paintings_df['title'].str.strip().str.title()
+    return paintings_df
+
+def transform_colors(colors_df):
+    print("Colors columns:", colors_df.columns.tolist())  #debug print
+
+    colors_df['colors'] = colors_df['colors'].str.strip().str.lower()
+
+    return colors_df
+
+def transform_subjects(subjects_df):
+    # Normalize columns to lowercase
+    subjects_df.columns = subjects_df.columns.str.lower()
+
+    # Clean title column: remove extra quotes, strip, title case
+    subjects_df['title'] = subjects_df['title'].str.replace('"', '').str.strip().str.title()
+
+    # Identify subject columns (all except episode and title)
+    subject_cols = [col for col in subjects_df.columns if col not in ['episode', 'title']]
+
+    # Melt to long format
+    melted = subjects_df.melt(
+        id_vars=['episode', 'title'],
+        value_vars=subject_cols,
+        var_name='subject',
+        value_name='present'
+    )
+
+    # Filter to subjects that are present (1)
+    melted = melted[melted['present'] == 1]
+
+    # Lowercase subject names
+    melted['subject'] = melted['subject'].str.lower()
+
+    # Reset index
+    melted = melted.reset_index(drop=True)
+
+    return melted[['episode', 'title', 'subject']]
+
 def transform_data(raw_data):
-    """
-    Cleans and standardizes raw data fields for consistency.
+    paintings = transform_paintings(raw_data['paintings'])
+    colors = transform_colors(raw_data['colors'])
+    subjects = transform_subjects(raw_data['subjects'])
 
-    Args:
-        raw_data (dict): Dictionary containing raw DataFrames
-                         with keys 'paintings', 'colors', and 'subjects'.
-
-    Returns:
-        dict: Dictionary containing cleaned DataFrames.
-    """
-    # Extract individual DataFrames
-    paintings = raw_data['paintings']
-    colors = raw_data['colors']
-    subjects = raw_data['subjects']
-
-    # Normalize 'title' in paintings:
-    # - Remove leading/trailing spaces
-    # - Convert to title case (e.g., "starry night")
-    paintings['title'] = paintings['title'].str.strip().str.title()
-
-    # Clean 'colors':
-    # - Remove spaces
-    # - Convert all to lowercase for uniformity
-    colors['colors'] = colors['colors'].str.strip().str.lower()
-
-    # Clean 'subject':
-    # - Remove spaces
-    # - Convert all to lowercase for uniformity
-    subjects['subject'] = subjects['subject'].str.strip().str.lower()
-
-    # Return the cleaned DataFrames in a dictionary
     return {
         'paintings': paintings,
         'colors': colors,

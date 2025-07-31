@@ -1,12 +1,10 @@
 import psycopg2
-import os
 
-# Returns a PostgreSQL connection object
 def get_db_connection():
     return psycopg2.connect(
-        dbname="your_db_name",
-        user="your_username",
-        password="your_password",
+        dbname="joy_of_painting",
+        user="bob_ross",
+        password="colors",
         host="localhost",
-        port=5432
+        port="5432"
     )
