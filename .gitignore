@@ -5,7 +5,6 @@ __pycache__/
 
 # Virtual environment
 venv/
-.env/
 
 # Environment variables
 .env
@@ -19,7 +18,7 @@ Thumbs.db
 *.log
 *.sqlite3
 
-# Data files (optional – if you're using large CSVs/JSONs during testing)
+# Data files
 *.csv
 *.json
 
@@ -33,19 +32,10 @@ dist/
 build/
 .eggs/
 
-# VS Code settings
-.vscode/
-
-# Python
-__pycache__/
-*.pyc
-
-# Virtual Environment
-venv/
-
-# IDE
+# VS Code / IDE settings
 .vscode/
 .idea/
 
-#database
-etl.db.py
+# Compiled Python
+*.pyc
+
