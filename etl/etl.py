@@ -1,6 +1,6 @@
-from extract import extract_data
-from transform import transform_data
-from load import load_data
+from .extract import extract_data
+from .transform import transform_data
+from .load import load_data
 
 # Master script to run full ETL pipeline
 def run_etl():
