@@ -1,5 +1,4 @@
 import ast
-import re
 from etl.db import get_db_connection
 from etl.utils import normalize_title  # <-- imported from utils
 
@@ -16,13 +15,26 @@ def load_data(data):
     for idx, row in paintings.iterrows():
         raw_title = row['title']
         norm_title = normalize_title(raw_title)
-        episode = row.get('episode_number') or row.get('episode') or None
-        season = row.get('season_number') or row.get('season') or None
+
+        # Prefer the keys that exist; convert to int or None
+        episode = row.get('episode') or row.get('episode_number') or None
+        season = row.get('season') or row.get('season_number') or None
+
+        try:
+            episode = int(episode) if episode is not None else None
+        except (ValueError, TypeError):
+            episode = None
+
+        try:
+            season = int(season) if season is not None else None
+        except (ValueError, TypeError):
+            season = None
+
         air_date = row.get('air_date') or None
 
         cur.execute(
             """
-            INSERT INTO painting (title, episode_number, season_number, air_date)
+            INSERT INTO painting (title, episode, season, air_date)
             VALUES (%s, %s, %s, %s)
             ON CONFLICT (title) DO UPDATE SET title=EXCLUDED.title
             RETURNING id

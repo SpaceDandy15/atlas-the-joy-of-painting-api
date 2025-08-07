@@ -5,7 +5,6 @@ app = Flask(__name__)
 
 @app.route("/episodes", methods=["GET"])
 def get_episodes():
-    # Get filter query parameters: multiple allowed for month, color, subject
     months = request.args.getlist("month")
     colors = request.args.getlist("color")
     subjects = request.args.getlist("subject")
@@ -18,7 +17,6 @@ def get_episodes():
     if months:
         month_conds = []
         for m in months:
-            # Use PostgreSQL TO_CHAR on air_date to get month name
             month_conds.append("TO_CHAR(painting.air_date, 'Month') ILIKE %s")
             params.append(f"%{m}%")
         conditions.append("(" + " OR ".join(month_conds) + ")")
@@ -39,16 +37,16 @@ def get_episodes():
             params.append(f"%{s}%")
         conditions.append("(" + " OR ".join(subject_conds) + ")")
 
-    # Combine conditions with AND or OR based on mode param
     connector = " AND " if mode == "and" else " OR "
     where_clause = f"WHERE {connector.join(conditions)}" if conditions else ""
 
-    # Main query: select painting info + aggregate colors and subjects as JSON arrays
     query = f"""
         SELECT
             painting.id,
             painting.title,
             painting.air_date,
+            painting.season,
+            painting.episode,
             COALESCE(
                 json_agg(DISTINCT color.name) FILTER (WHERE color.name IS NOT NULL),
                 '[]'
@@ -63,31 +61,30 @@ def get_episodes():
         LEFT JOIN painting_subject ON painting.id = painting_subject.painting_id
         LEFT JOIN subject ON subject.id = painting_subject.subject_id
         {where_clause}
-        GROUP BY painting.id, painting.title, painting.air_date
+        GROUP BY painting.id, painting.title, painting.air_date, painting.season, painting.episode
         ORDER BY painting.air_date
     """
 
-    # Execute query with parameters safely
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(query, params)
     rows = cur.fetchall()
 
-    # Build list of results with fields from the query
     results = []
     for row in rows:
         results.append({
             "id": row[0],
             "title": row[1],
-            "date": row[2].isoformat() if row[2] else None,
-            "colors": row[3],
-            "subjects": row[4]
+            "date": row[2].strftime('%Y-%m-%d') if row[2] else None,
+            "season": row[3],
+            "episode": row[4],
+            "colors": row[5],
+            "subjects": row[6]
         })
 
     cur.close()
     conn.close()
 
-    # Return JSON response
     return jsonify(results)
 
 if __name__ == "__main__":
